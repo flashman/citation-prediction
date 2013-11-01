@@ -53,3 +53,7 @@ Thumbs.db
 # Autosaved files #
 ###################
 *.*~
+
+# Misc #
+########
+.ropeproject/
