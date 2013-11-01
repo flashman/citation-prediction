@@ -15,4 +15,5 @@ Hyung Joo Park
 
 To save space in the repository, the content of data/ and papers/ are ignroed by git.
 Instead manually download hep-th ngram and citaiton data into data/:
-
+$ cd data/
+$ curl 
