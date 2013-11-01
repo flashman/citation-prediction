@@ -1,4 +1,6 @@
-CS4780 FINAL PROJECT
+************************
+* CS4780 FINAL PROJECT * 
+************************
 
 CITATION PREDECTION AND TOPIC MODELING
 Late 2013
@@ -6,4 +8,11 @@ Late 2013
 Michael Flashman
 Andrey Gushchin
 Hyung Joo Park
+
+*********
+* SETUP *
+*********
+
+To save space in the repository, the content of data/ and papers/ are ignroed by git.
+Instead manually download hep-th ngram and citaiton data into data/:
 
