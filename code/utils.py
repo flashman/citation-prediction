@@ -5,13 +5,18 @@
 '''
 
 import re
+import time
 
 GZ = re.compile('.*\.gz$')
 ARXIVFN = re.compile('^[0-9]{4,}\.(txt|prep)(?:\.gz)?$')
 PRE2000 = re.compile('^[5-9][0-9].*')
 POST2000 = re.compile('^[0-4][0-9].*')
 
-#DATA UTILITY FUNCTIONS
+YEARS= [str(y)[2:4] for y in range(1993,2004)]
+MONTHS =[str(m)[1:3] for m in range(101,113)]
+YYMM = [yy+mm for yy in YEARS for mm in MONTHS][0:124]
+
+#ARXIV ID/DATE UTILITY FUNCTIONS
 def datehelper(s):
     if PRE2000.match(s):
         return '19'+s
@@ -39,4 +44,27 @@ def fixid( oid ):
     else:
         nid = oid
     return nid
+
+def addMonths(yymm, m):
+    '''Add m months to yymm date string'''
+    index = YYMM.index(yymm[0:4])
+    return YYMM[index +m ] + yymm[4:]
+
+def dateRange(start,end):
+    try:
+        sp = YYMM.index(start)
+    except:
+        sp = 0
+    try:
+        ep = YYMM.index(end)
+    except:
+        ep = len(YYMM)
+    return YYMM[sp:ep]
+
+#TIME UTILITY FUNCTIONS
+def current_milli_time():
+    return int(round(time.time() * 1000))
+
+def current_micro_time():
+    return int(round(time.time() * 1000000))
 

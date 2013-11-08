@@ -10,12 +10,8 @@ import  utils
 
 class Network:
     ''' Build and manage network.'''
-    def __init__(self,directed=True):
-        self.source = list()
-        self.target = list()
-        self.weight = list()
-        self.directed=directed
-        self.M = None
+    def __init__(self):
+        self.reset()
 
     def addLink(self,s,t,w):
         self.source.append(s)
@@ -39,6 +35,13 @@ class Network:
         else:
             return M[start:end,:].sum(0).A1
 
+    def reset(self):
+        self.source = list()
+        self.target = list()
+        self.weight = list()
+        self.M = None
+        
+
 class CitationNetwork(Network):
     def __init__(self):
         Network.__init__(self)
@@ -46,10 +49,9 @@ class CitationNetwork(Network):
         self.papers = list()   
         self.paperIndex = dict()
         self.links = list()
-        self.start = '9301'
-        self.end = '0401'
 
     def load(self,dataFile):
+        '''Load citation network into memory'''
 
         #read in citation network data
         self.dataFile = dataFile
@@ -73,7 +75,8 @@ class CitationNetwork(Network):
         self.papers = sorted(self.papers, key=lambda(p): utils.datehelper(p))
         self.paperIndex = dict( (p,i) for p,i in izip( self.papers, range(self.nNodes) ) )
         
-        #build adjacency matrix
+        #rebuild adjacency matrix
+        self.M = None
         for l in self.links:
             self.addLink(self.paperIndex[l[0]], self.paperIndex[l[1]], 1.0)
         self.buildMatrix()
@@ -98,14 +101,17 @@ class CitationNetwork(Network):
         return self.inLinks(start=startIndex,end=endIndex)
         
     def outDegree(self,start=None,end=None):
-        '''Get out degree of each paper, subject to the constraint that target node lies within the range start:end''' 
+        '''
+        Get out degree of each paper, subject to the constraint that target node lies within the range start:end.
+        Return numpy array of length nPapers.
+        ''' 
         if type(start)==str:
             try:
                 startIndex = self.paperIndex[start+'001']
             except:
                 startIndex = 0
             try:
-                endIndex = self.paperIndex[end+'001']  
+                endIndex = self.paperIndex[end+'001']
             except:
                 endIndex =self.nNodes
         elif type(start)==int:
@@ -116,12 +122,19 @@ class CitationNetwork(Network):
             endIndex=self.nNodes
         return self.outLinks(start=startIndex,end=endIndex)
 
-    def dataToDict(self,data):
-        '''Build dictionary of arxivid, data pairs'''
+    def toDict(self,data):
+        '''Build dictionary of (arxivid, data) pairs'''
         return dict((aid, d) for aid,d in izip(self.papers,data))
 
-    def filterByDate(self,data,start,end):
+    def filterByDate(self,data,start=None,end=None):
+        '''
+        Filter data by start and end date strings.
+        Assumes that data is an iterable of length equal to the number of papers.
+        Alternatively, data can be a dictionary of (arxiv_id,value) pairs of arbitrary length. 
+        '''
+        if start==None: start=self.papers[0][0:4]
+        if end==None: end=self.papers[-1][0:4]
         if type(data)==dict:
             return  dict( (k,v) for k,v in data.iteritems() if utils.datecomp(start,k) and utils.datecomp(k,end) )
-        elif type(data)==list:
+        else:
             return  [v for k,v in izip(self.papers, data) if utils.datecomp(start,k)  and utils.datecomp(k,end) ]

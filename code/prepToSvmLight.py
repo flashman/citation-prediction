@@ -39,7 +39,7 @@ for filename in filenames:
     for line in raw.splitlines():
         line = line.split(',')
         arxiv_id = line[0].split('/')[1]
-        svmline = [arxiv_id]
+        svmline=[]
         for k,v in zip(line[3::2], line[4::2]):
             if k in vocabularySet:
                 i = vocabularyIndex[k]
@@ -50,6 +50,7 @@ for filename in filenames:
                 vocabulary.append(k)
                 W+=1
             svmline.append(':'.join([str(i),v]))
+        svmline = [arxiv_id] + sorted(svmline, key = lambda(d): int(d.split(':')[0])) 
         fsvm.write(' '.join(svmline) + '\n')
     fsvm.close()
 
