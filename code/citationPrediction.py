@@ -11,6 +11,7 @@ import utils
 import collection
 import citationNetwork
 import naiveBayes
+import SVMLight
 
 def loadAndLabel(network,root,start,end,nMonths=12,threshold=10):
     '''
@@ -58,21 +59,29 @@ if __name__ == '__main__':
     parser.add_argument("-ps","--predictstart",help="Specify start date of prediction documets.  Eg '9501' ")
     parser.add_argument("-pe","--predictend",help="Specify end date of prediction documets.  Eg '9601' ")
     parser.add_argument("-t","--threshold",help="Citation count threshold.", type=int, default=10)
-
     parser.add_argument("-m","--months",help="Number of months used in tabulation of article citations.", type=int, default=12)
     args = parser.parse_args(sys.argv)
     
     N = citationNetwork.CitationNetwork()
     N.load(args.citation)
 
-    print 'Loading training data...'
+    print 'Preparing training data...'
     C = loadAndLabel(N, args.root, args.trainstart, args.trainend, args.months,args.threshold)
-    print 'loading test data...'
+    print 'Preparing test data...'
     D = loadAndLabel(N, args.root, args.predictstart, args.predictend, args.months,args.threshold)
 
+    print 'Training NaiveBayes Classifier...'
     NB = naiveBayes.NaiveBayes()
     NB.train(C.labels, C.M)
-    NB.report(D.labels,  NB.test(D.M)) 
+    print 'Testing NaiveBayes Classifier...'
+    predictions = NB.test(D.M)
+    NB.report(D.labels,  predictions) 
+
+    print 'Training SVM Classifier...'
+    model = SVMLight.learn(C, '-c 0.001')
+    print 'Testing SVM Classifier...'
+    predictions = [1 if p>=0 else -1 for p in SVMLight.classify(D,model)]
+    utils.report(D.labels,  predictions) 
 
     
 

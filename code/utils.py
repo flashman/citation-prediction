@@ -6,6 +6,7 @@
 
 import re
 import time
+from itertools import izip
 
 GZ = re.compile('.*\.gz$')
 ARXIVFN = re.compile('^[0-9]{4,}\.(txt|prep)(?:\.gz)?$')
@@ -68,3 +69,31 @@ def current_milli_time():
 def current_micro_time():
     return int(round(time.time() * 1000000))
 
+#REPORTING
+def report(labels,predictions):
+    errors=0
+    falsePos=0
+    falseNeg=0
+    truePos=0
+    trueNeg=0
+
+
+    for p,l in izip(predictions,labels):
+        if p!=l:
+            errors +=1
+            if l==1:
+                falseNeg+=1
+            else:
+                falsePos+=1
+        else:
+            if l==1:
+                truePos+=1
+            else:
+                trueNeg+=1
+    print "Documents classified: " + str(len(labels))
+    print "True Positives: " + str(truePos) 
+    print "True Negatives: " + str(trueNeg) 
+    print "False Positives: " + str(falsePos)
+    print "False Negatives: " + str(falseNeg)
+    print "Errors: " + str(errors)
+    print "Error rate: " + str(1.0*errors/len(labels))
