@@ -38,7 +38,6 @@ def loadAndLabel(network,root,start,end,nMonths=12,threshold=10):
             else:
                 labels.append(-1)
         C.labels = labels
-        print len( [l for l in labels if l>0 ])
         collections.append(C)
 
     #join and return as single collection
@@ -54,23 +53,26 @@ if __name__ == '__main__':
     parser.add_argument("main")
     parser.add_argument("root",help="Root directory of document feature vectors (one file per month)", default='../data/hep-th-svm/')
     parser.add_argument("citation",help="Location of citation network data.", default='../data/cit-hep-th.txt')
-    parser.add_argument("-s","--start",help="Specify start date of documets to be considered.  Eg '9501' ")
-    parser.add_argument("-e","--end",help="Specify end date of documets to be considered.  Eg '9601' ")
+    parser.add_argument("-ts","--trainstart",help="Specify start date of training documets.  Eg '9501' ")
+    parser.add_argument("-te","--trainend",help="Specify end date of training documets.  Eg '9601' ")
+    parser.add_argument("-ps","--predictstart",help="Specify start date of prediction documets.  Eg '9501' ")
+    parser.add_argument("-pe","--predictend",help="Specify end date of prediction documets.  Eg '9601' ")
+    parser.add_argument("-t","--threshold",help="Citation count threshold.", type=int, default=10)
+
     parser.add_argument("-m","--months",help="Number of months used in tabulation of article citations.", type=int, default=12)
     args = parser.parse_args(sys.argv)
-
     
     N = citationNetwork.CitationNetwork()
     N.load(args.citation)
 
-    C = loadAndLabel(N, args.root, args.start, args.end, args.months)
-    D = loadAndLabel(N, args.root, utils.addMonths(args.end,1+args.months), utils.addMonths(args.end,2+args.months), args.months)
-
+    print 'Loading training data...'
+    C = loadAndLabel(N, args.root, args.trainstart, args.trainend, args.months,args.threshold)
+    print 'loading test data...'
+    D = loadAndLabel(N, args.root, args.predictstart, args.predictend, args.months,args.threshold)
 
     NB = naiveBayes.NaiveBayes()
     NB.train(C.labels, C.M)
-    predictions = NB.test(D.M)
-    NB.report(D.labels, predictions) 
+    NB.report(D.labels,  NB.test(D.M)) 
 
     
 

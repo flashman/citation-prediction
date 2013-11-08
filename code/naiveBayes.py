@@ -65,6 +65,8 @@ class NaiveBayes:
         errors=0
         falsePos=0
         falseNeg=0
+        truePos=0
+        trueNeg=0
         for p,l in izip(predictions,labels):
             if p!=l:
                 errors +=1
@@ -72,9 +74,16 @@ class NaiveBayes:
                     falseNeg+=1
                 else:
                     falsePos+=1
-
+            else:
+                if l==1:
+                    truePos+=1
+                else:
+                    trueNeg+=1
+        print "Document trained on: " + str(self.nDocs)
         print "Documents classified: " + str(len(labels))
-        print "Errors: " + str(errors)
-        print "Error rate: " + str(1.0*errors/len(labels))
+        print "True Positives: " + str(truePos) 
+        print "True Negatives: " + str(trueNeg) 
         print "False Positives: " + str(falsePos)
         print "False Negatives: " + str(falseNeg)
+        print "Errors: " + str(errors)
+        print "Error rate: " + str(1.0*errors/len(labels))
