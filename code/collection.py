@@ -20,8 +20,6 @@ class Collection:
 
     def load(self,fileLocation,count=True):
         '''Load svmlight formatted data in label array and csr sparse matrix (row=doc_id, col=word_id)'''
-        
-        print 'Loading ' + fileLocation
 
         self.fileLocation = fileLocation
 
