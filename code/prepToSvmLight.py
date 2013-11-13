@@ -5,10 +5,11 @@
 '''
 
 import os
+import gzip
 from utils import *
 
-DATADIR = '../data/hep-th/'
-RESULTSDIR = '../data/hep-th-svm/'
+DATADIR = '../data/hep-th.ta/'
+RESULTSDIR = '../data/hep-th-svm.ta/'
 
 W = 1
 vocabularyIndex = dict()
@@ -27,8 +28,14 @@ filenames = sorted(fns,key=lambda(d,f):datehelper(f))
 
 #build svmlight formated data 
 for filename in filenames:
+
+    if GZ.match(filename[1]):
+        fopen = gzip.open
+    else:
+        fopen = open
+
     #read data file
-    f = open(os.path.join(filename[0], filename[1]))
+    f = fopen(os.path.join(filename[0], filename[1]))
     raw = f.read()
     f.close()
 
@@ -38,7 +45,7 @@ for filename in filenames:
     #transform lines to svm format
     for line in raw.splitlines():
         line = line.split(',')
-        arxiv_id = line[0].split('/')[1]
+        arxiv_id = line[0] #line[0].split('/')[1]
         svmline=[]
         for k,v in zip(line[3::2], line[4::2]):
             if k in vocabularySet:

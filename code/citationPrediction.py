@@ -78,7 +78,7 @@ if __name__ == '__main__':
     NB.report(D.labels,  predictions) 
 
     print 'Training SVM Classifier...'
-    model = SVMLight.learn(C, '-c 0.001')
+    model = SVMLight.learn(C, ' -t 1 -d 1')
     print 'Testing SVM Classifier...'
     predictions = [1 if p>=0 else -1 for p in SVMLight.classify(D,model)]
     utils.report(D.labels,  predictions) 
