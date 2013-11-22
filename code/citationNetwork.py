@@ -35,6 +35,22 @@ class Network:
         else:
             return M[start:end,:].sum(0).A1
 
+    def degreeDistribution(self,opt='in'):
+        '''
+        Get in/out degree distrubution.  
+        Options: opt -> {'in', 'out'}
+        '''
+        if opt == 'in':
+            deg = self.inLinks()
+        elif opt == 'out':
+            deg = self.outLinks()
+        maxDeg = max(deg)
+        dd = (maxDeg+1)*[0]
+        for d in deg:
+            dd[d]+=1
+        return dd
+
+
     def reset(self):
         self.source = list()
         self.target = list()

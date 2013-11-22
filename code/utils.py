@@ -70,7 +70,9 @@ def current_micro_time():
     return int(round(time.time() * 1000000))
 
 #REPORTING
-def report(labels,predictions):
+def report(labels,predictions,verbose=True):
+    nPos = sum(1 for l in labels if l>0)
+    nNeg = sum( 1 for l in labels if l<0 )
     errors=0
     falsePos=0
     falseNeg=0
@@ -90,10 +92,19 @@ def report(labels,predictions):
                 truePos+=1
             else:
                 trueNeg+=1
-    print "Documents classified: " + str(len(labels))
-    print "True Positives: " + str(truePos) 
-    print "True Negatives: " + str(trueNeg) 
-    print "False Positives: " + str(falsePos)
-    print "False Negatives: " + str(falseNeg)
-    print "Errors: " + str(errors)
-    print "Error rate: " + str(1.0*errors/len(labels))
+
+    errorRate = 1.0*errors/len(labels)
+    naiveErrorRate = 1.0 - 1.0*max(nPos,nNeg)/len(labels) 
+
+    if verbose:
+        print "Documents classified: " + str(len(labels))
+        print "Total Positive: " + str(nPos)
+        print "Total Negative: " + str(nNeg)
+        print "True Positives: " + str(truePos) 
+        print "True Negatives: " + str(trueNeg) 
+        #print "False Positives: " + str(falsePos)
+        #print "False Negatives: " + str(falseNeg)
+        #print "Errors: " + str(errors)
+        print "Error rate: " + str( errorRate)
+        print "Niave error rate: " + str(naiveErrorRate)
+    return [errorRate, naiveErrorRate,nPos,nNeg,truePos,trueNeg,falsePos,falseNeg]

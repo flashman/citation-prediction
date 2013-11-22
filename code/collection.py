@@ -105,7 +105,7 @@ class Collection:
         self.nVocab=nVocab
         self.nDocs=self.M.shape[0]
 
-    def removeStopWords(threshold = 0.9):
+    def removeStopWords(self, threshold = 0.9):
         '''
         Remove words that appear in more than threshold (% or int) of documents. 
         Defaults to 90%
@@ -116,13 +116,14 @@ class Collection:
             else:
                 threshold = int(threshold)
 
-        return 0
-
-    def removeInfrequentWords(threshold=2):
+    def removeInfrequentWords(self, threshold=2):
         '''
         Remove words that appear in less than threshold (% or int) of documents.
         Defaults to 2 documents.
-        '''
+        '''        
+#        keepCols = [i for i,v in enumerate(self.M.sum(0).A1) if v>=threshold ] 
+#        self.nVocab = len(keepCols)
+#        self.M = self.M[:,keepCols]
 
 def join(collectionList):
     '''

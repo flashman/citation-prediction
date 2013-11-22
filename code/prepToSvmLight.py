@@ -8,8 +8,9 @@ import os
 import gzip
 from utils import *
 
-DATADIR = '../data/hep-th.ta/'
-RESULTSDIR = '../data/hep-th-svm.ta/'
+DATADIR = '../data/hep-th/'
+RESULTSDIR = '../data/hep-th-svm-cleaned-2/'
+FREQTHRESHOLD = 2
 
 W = 1
 vocabularyIndex = dict()
@@ -45,18 +46,20 @@ for filename in filenames:
     #transform lines to svm format
     for line in raw.splitlines():
         line = line.split(',')
-        arxiv_id = line[0] #line[0].split('/')[1]
+        #arxiv_id = line[0] 
+        arxiv_id = line[0].split('/')[1]
         svmline=[]
         for k,v in zip(line[3::2], line[4::2]):
-            if k in vocabularySet:
-                i = vocabularyIndex[k]
-            else:
-                i = W
-                vocabularyIndex[k]=i
-                vocabularySet.add(k)
-                vocabulary.append(k)
-                W+=1
-            svmline.append(':'.join([str(i),v]))
+            if int(v) >= FREQTHRESHOLD:
+                if k in vocabularySet:
+                    i = vocabularyIndex[k]
+                else:
+                    i = W
+                    vocabularyIndex[k]=i
+                    vocabularySet.add(k)
+                    vocabulary.append(k)
+                    W+=1
+                svmline.append(':'.join([str(i),v]))
         svmline = [arxiv_id] + sorted(svmline, key = lambda(d): int(d.split(':')[0])) 
         fsvm.write(' '.join(svmline) + '\n')
     fsvm.close()
