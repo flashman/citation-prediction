@@ -7,11 +7,11 @@ class NaiveBayes:
         self.trainMat = None
         self.nVocab = None
 
-    def train(self,labels,matrix):
-        '''Train Naive Bayes classifier on data in fileLocation'''
+    def learn(self,trainingData,options=None):
+        '''Train Naive Bayes classifier on trainingData.  trainingData is anything with label and M (matrix) properties'''
         #load data and compute basic statistics
-        self.labels= labels
-        self.trainMat = matrix 
+        self.labels= trainingData.labels
+        self.trainMat = trainingData.M 
         self.nVocab = self.trainMat.shape[1]
         self.nDocs = self.trainMat.shape[0]
         self.nPos = sum(1 for l in self.labels if l>0 )
@@ -31,11 +31,14 @@ class NaiveBayes:
         self.logPWordsPos = numpy.log( (1.0 + self.wordsPos ) / (self.nVocab + self.nWordsPos))
         self.logPWordsNeg = numpy.log( (1.0 + self.wordsNeg ) / (self.nVocab + self.nWordsNeg))
 
-    def test(self, testMat, cost=(0.0,1.0,1.0,0.0)):
+        print "Model trained on {0} examples".format(self.nDocs)
+
+    def classify(self, testData, cost=(0.0,1.0,1.0,0.0),options=None):
         '''
-        Test data in fileLocation using training probabilities,
+        Test data in testData.M  using training probabilities,
         weight prediction by cost matrix.
         '''
+        testMat = testData.M
         nTestDocs,nTestVocab = testMat.shape
         #fix testMat if it doesn't include all the words 
         if nTestVocab < self.nVocab:
@@ -59,30 +62,3 @@ class NaiveBayes:
             else:
                 predictions.append(self.lMajority)
         return predictions
-
-    def report(self,labels,predictions):
-        errors=0
-        falsePos=0
-        falseNeg=0
-        truePos=0
-        trueNeg=0
-        for p,l in izip(predictions,labels):
-            if p!=l:
-                errors +=1
-                if l==1:
-                    falseNeg+=1
-                else:
-                    falsePos+=1
-            else:
-                if l==1:
-                    truePos+=1
-                else:
-                    trueNeg+=1
-        print "Document trained on: " + str(self.nDocs)
-        print "Documents classified: " + str(len(labels))
-        print "True Positives: " + str(truePos) 
-        print "True Negatives: " + str(trueNeg) 
-        print "False Positives: " + str(falsePos)
-        print "False Negatives: " + str(falseNeg)
-        print "Errors: " + str(errors)
-        print "Error rate: " + str(1.0*errors/len(labels))

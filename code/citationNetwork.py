@@ -50,7 +50,6 @@ class Network:
             dd[d]+=1
         return dd
 
-
     def reset(self):
         self.source = list()
         self.target = list()

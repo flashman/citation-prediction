@@ -71,40 +71,52 @@ def current_micro_time():
 
 #REPORTING
 def report(labels,predictions,verbose=True):
-    nPos = sum(1 for l in labels if l>0)
-    nNeg = sum( 1 for l in labels if l<0 )
-    errors=0
-    falsePos=0
+    '''
+    Report prediction success for binary learning task. Return error rate, precision, recall and naive error rate as a dict.  Also return a boolean vector indicating which predictions were correct.
+    '''
+    total = 1.0*len(labels)
+    falsePos=0 
     falseNeg=0
-    truePos=0
+    truePos=0 
     trueNeg=0
+    tf = []
 
 
     for p,l in izip(predictions,labels):
         if p!=l:
-            errors +=1
+            tf.append(False)
             if l==1:
                 falseNeg+=1
             else:
                 falsePos+=1
         else:
+            tf.append(True)
             if l==1:
                 truePos+=1
             else:
                 trueNeg+=1
 
-    errorRate = 1.0*errors/len(labels)
-    naiveErrorRate = 1.0 - 1.0*max(nPos,nNeg)/len(labels) 
-
+    results = dict()
+    results['documents'] = total
+    results['errors'] = falsePos+falseNeg
+    results['errorRate'] = 1.0*(falsePos+falseNeg)/total
+    results['accuracy'] = 1.0*(truePos+trueNeg)/total
+    results['precision'] = 1.0*truePos/(truePos+falsePos)
+    results['recall'] = 1.0*truePos/(truePos+falseNeg)
+    results['naive'] = 1.0*min(truePos+falseNeg,trueNeg + falsePos)/total
+    results['tf']=tf
+    
     if verbose:
-        print "Documents classified: " + str(len(labels))
-        print "Total Positive: " + str(nPos)
-        print "Total Negative: " + str(nNeg)
-        print "True Positives: " + str(truePos) 
-        print "True Negatives: " + str(trueNeg) 
-        #print "False Positives: " + str(falsePos)
-        #print "False Negatives: " + str(falseNeg)
-        #print "Errors: " + str(errors)
-        print "Error rate: " + str( errorRate)
-        print "Niave error rate: " + str(naiveErrorRate)
-    return [errorRate, naiveErrorRate,nPos,nNeg,truePos,trueNeg,falsePos,falseNeg]
+        print "Documents classified: " + str(total)
+        print "Errors: " + str(falsePos+falseNeg)
+        print "Error rate: " + str(results['errorRate'])
+        print "Accuracy: " + str(results['accuracy'])
+        print "Precision: " + str(results['precision'])
+        print "Recall: " + str(results['recall'])
+        print "Niave error rate: " + str(results['naive'])
+    return results
+
+def report_regression(labels,predictions,verbose=True):
+    '''
+    report on regression based predictions
+    '''

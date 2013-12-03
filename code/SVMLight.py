@@ -9,6 +9,19 @@ import subprocess as sbp
 import os
 import utils
 
+class SVM:
+    def __init__(self):
+        '''Do nothing yet'''
+        
+    def learn(self,trainingData, options=None):
+        self.model = learn(trainingData,options=options)
+        
+    def classify(self,testData, binary=True, options=None):
+        predictions = classify(testData,self.model,options=options)
+        if binary:
+            predictions = [1 if p>=0 else -1 for p in predictions]
+        return predictions
+
 class Model:
     ''' SVM light model class.  For now it justs removes model file when we are done'''  
     def __init__(self,modelFile):

@@ -12,6 +12,7 @@ import collection
 import citationNetwork
 import naiveBayes
 import SVMLight
+import pickle
 
 def loadAndLabel(network,root,start,end,nMonths=12,threshold=10,log=False):
     '''
@@ -31,7 +32,7 @@ def loadAndLabel(network,root,start,end,nMonths=12,threshold=10,log=False):
         inDeg = network.filterByDate(inDeg,start=yymm,end=utils.addMonths(yymm,1))
     
         #Attach labels to articles
-        #NOTE: Some articles do not appear in the citation network data.  We assume that these articles received zero citations.
+        #NOTE: Some articles do not appear in the citation network data.  Such articles received zero citations.
         labels = []
         for l in C.labels:
             if (not log) and l in inDeg and inDeg[l] >= threshold:
@@ -47,6 +48,26 @@ def loadAndLabel(network,root,start,end,nMonths=12,threshold=10,log=False):
     C = collection.join(collections)
     return C
 
+def trainAndTest(citationNetwork,trainstart,trainend,predictstart,predictend,months,threshold,args):
+    '''Train and test classifier.  Return prediction statistics'''
+    if args.naivebayes: 
+        classifier = naiveBayes.NaiveBayes() 
+    elif args.svm:
+        classifier = SVMLight.SVM() 
+    else:
+        print "No classifier given."
+        return 
+
+    #Preparing data...
+    TRAIN = loadAndLabel(citationNetwork, args.root, trainstart, trainend, months, threshold)
+    TEST = loadAndLabel(citationNetwork, args.root, predictstart, predictend, months, threshold)
+    
+    #classifying data...
+    classifier.learn(TRAIN,options=args.options)
+    predictions = classifier.classify(TEST)
+    results = utils.report(TEST.labels,  predictions) 
+    return results
+
 if __name__ == '__main__':
     '''
     The main program
@@ -54,81 +75,49 @@ if __name__ == '__main__':
     #parse inputs
     parser = ArgumentParser()
     parser.add_argument("main")
-    parser.add_argument("root",help="Root directory of document feature vectors (one file per month)", default='../data/hep-th-svm/')
-    parser.add_argument("citation",help="Location of citation network data.", default='../data/cit-hep-th.txt')
+    parser.add_argument("-r", "--root",help="Root directory of document feature vectors (one file per month)", default='../data/hep-th-svm/')
+    parser.add_argument("-c", "--citation",help="Location of citation network data.", default='../data/cit-hep-th.txt')
     parser.add_argument("-ts","--trainstart",help="Specify start date of training documets.  Eg '9501' ")
     parser.add_argument("-te","--trainend",help="Specify end date of training documets.  Eg '9601' ")
+    parser.add_argument("-tw","--trainwindow",help="Specify the size of the trainging period.  Eg 12 ", type=int, default=12)
     parser.add_argument("-ps","--predictstart",help="Specify start date of prediction documets.  Eg '9501' ")
     parser.add_argument("-pe","--predictend",help="Specify end date of prediction documets.  Eg '9601' ")
     parser.add_argument("-t","--threshold",help="Citation count threshold.", type=int, default=10)
     parser.add_argument("-m","--months",help="Number of months used in tabulation of article citations.", type=int, default=12)
     parser.add_argument("-svm","--svm",help="Predict with support vector machine", action="store_true")
+    parser.add_argument("-o","--options",help="Optional parameter string for SVM classifier.  Ignored by naive bayes classifier.", type=str, default=None)
     parser.add_argument("-nb","--naivebayes",help="Prediict with naive bayes.", action="store_true")
-
     args = parser.parse_args(sys.argv)
     
+    #Load citation network for later use
     N = citationNetwork.CitationNetwork()
     N.load(args.citation)
 
-#    print 'Preparing training data...'
-#    C = loadAndLabel(N, args.root, args.trainstart, args.trainend, args.months,args.threshold)
-#    print 'Preparing test data...'
-#    D = loadAndLabel(N, args.root, args.predictstart, args.predictend, args.months,args.threshold)
+    #trainAndTest(N,args.trainstart,args.trainend,args.predictstart,args.predictend,args.months,args.threshold, args)
 
-#    if args.naivebayes:
-#        print 'Training NaiveBayes Classifier...'
-#        NB = naiveBayes.NaiveBayes()
-#        NB.train(C.labels, C.M)
-#        print 'Testing NaiveBayes Classifier...'
-#        predictions = NB.test(D.M)
-#        utils.report(D.labels,  predictions) 
-
-#    if args.svm:
-#        print 'Training SVM Classifier...'
-#        model = SVMLight.learn(C)
-#        print 'Testing SVM Classifier...'
-#        predictions = [1 if p>=0 else -1 for p in SVMLight.classify(D,model)]
-#        utils.report(D.labels,  predictions) 
-
-
-#   print "PART 2"
-    errDif = []
-    err = []
-
+    results=dict()
+    
     #predict citations for each month based on previous year
-    for i in range(2*args.months, len(utils.YYMM)- 2*args.months-3):
-        trainstart = utils.YYMM[i-args.months]
-        trainend = utils.YYMM[i]
-        predictstart = utils.YYMM[i+args.months+1]
-        predictend = utils.YYMM[i+args.months+2]
-        print "Predicting YYMM: " + predictstart
+    utils.YYMM
+    for yymm in utils.dateRange(args.trainstart,args.trainend):
+        trainstart = yymm
+        trainend = utils.addMonths(yymm,args.trainwindow)
+        predictstart = utils.addMonths(yymm, args.trainwindow+args.months)
+        predictend = utils.addMonths(yymm,+args.trainwindow+args.months+1) #predict on the following month's worth of data
 
-        #print 'Preparing training data...'
-        trainingData = loadAndLabel(N, args.root, trainstart, trainend, args.months,args.threshold)
-        #print 'Preparing test data...'
-        testingData = loadAndLabel(N, args.root, predictstart, predictend, args.months,args.threshold)
-
-        if args.naivebayes:
-            #print 'Training NaiveBayes Classifier...'
-            NB = naiveBayes.NaiveBayes()
-            NB.train(trainingData.labels, trainingData.M)
-            #print 'Testing NaiveBayes Classifier...'
-            predictions = NB.test(testingData.M)
-            r = utils.report(testingData.labels,  predictions)
-            err.append(r[0])
-            errDif.append(r[1]-r[0])
-
-        if args.svm:
-            print 'Training SVM Classifier...'
-            model = SVMLight.learn(trainingData)
-            print 'Testing SVM Classifier...'
-            predictions = [1 if p>=0 else -1 for p in SVMLight.classify(testingData,model)]
-            r = utils.report(testingData.labels,  predictions)
-            err.append(r[0])
-            errDif.append(r[1]-r[0])
+        "TRAINING ON:"
+        print trainstart
+        print trainend
+        "PREDICTING ON:"
+        print predictstart
+        print predictend
+        "CITATIONS OBTAINED OVER: " + str(args.months)
 
 
-    print err
-    print errDif
-    print 'AVG ERROR RATE:' + str(1.0*sum(err)/len(err))     
-    print 'AVG DECREASE IN ERROR RATE:' + str(1.0*sum(errDif)/len(errDif)) 
+        r = trainAndTest(N,trainstart, trainend, predictstart, predictend,args.months,args.threshold,args)
+        results['-'.join([trainstart,trainend,predictstart,predictend])] = r
+
+    #save results
+    f = open('../results/results.pickle', 'w')
+    pickle.dump(results,f)
+    f.close
