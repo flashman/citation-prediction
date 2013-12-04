@@ -16,9 +16,9 @@ class SVM:
     def learn(self,trainingData, options=None):
         self.model = learn(trainingData,options=options)
         
-    def classify(self,testData, binary=True, options=None):
+    def classify(self,testData, regression=False, options=None):
         predictions = classify(testData,self.model,options=options)
-        if binary:
+        if not regression:
             predictions = [1 if p>=0 else -1 for p in predictions]
         return predictions
 
@@ -90,7 +90,7 @@ def classify(testData,model,options=None):
     #clean up temp files
     os.remove(testFile)
     os.remove(classificationFile)
-    
+
     return classifications
 
 def multiclassLearn(trainingData,classLabels,options=None):

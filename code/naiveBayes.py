@@ -33,7 +33,7 @@ class NaiveBayes:
 
         print "Model trained on {0} examples".format(self.nDocs)
 
-    def classify(self, testData, cost=(0.0,1.0,1.0,0.0),options=None):
+    def classify(self, testData, cost=(0.0,1.0,1.0,0.0),options=None,regression=False):
         '''
         Test data in testData.M  using training probabilities,
         weight prediction by cost matrix.

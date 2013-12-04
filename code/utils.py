@@ -6,6 +6,7 @@
 
 import re
 import time
+
 from itertools import izip
 
 GZ = re.compile('.*\.gz$')
@@ -81,7 +82,6 @@ def report(labels,predictions,verbose=True):
     trueNeg=0
     tf = []
 
-
     for p,l in izip(predictions,labels):
         if p!=l:
             tf.append(False)
@@ -105,6 +105,8 @@ def report(labels,predictions,verbose=True):
     results['recall'] = 1.0*truePos/(truePos+falseNeg)
     results['naive'] = 1.0*min(truePos+falseNeg,trueNeg + falsePos)/total
     results['tf']=tf
+    results['labels']=labels
+    results['predictions']=predictions
     
     if verbose:
         print "Documents classified: " + str(total)
@@ -116,7 +118,30 @@ def report(labels,predictions,verbose=True):
         print "Niave error rate: " + str(results['naive'])
     return results
 
-def report_regression(labels,predictions,verbose=True):
+def report_regression(labels,predictions,verbose=True,epsilon=1):
     '''
     report on regression based predictions
     '''
+    total = 1.0*len(labels)
+    sqdiff = []
+    nOutliers = int(round(0.05*total))
+    outlierThreshold =  sorted(labels)[-nOutliers]
+    for p,l in izip(predictions,labels):
+        d = p-float(l)
+        ad = max(abs(d)-epsilon,0)
+        sqdiff.append(ad**2 )
+    avgsqdiff = sum(v for l,v in izip(labels, sqdiff) if l<outlierThreshold )/total #exclude outliers
+    nOutliers = sum(1 for l in labels if l>=outlierThreshold)
+    errors = sum( 1.0 for e in sqdiff if e>0)
+    errorRate = errors/total
+    results = {'avgSqDiff': avgsqdiff, 'sqDiff': sqdiff, 'errors': errors, 'errorRate':errorRate, 'nOutliers':nOutliers, 'outlierThreshold': outlierThreshold, 'predictions':predictions, 'labels': labels}
+
+    if verbose:
+        print "Documents classified: " + str(total)
+        print "Epsilon: " + str(epsilon)
+        print "Errors: " + str(errors)
+        print "Error Rate: " + str(errorRate)
+        print "Avg Sq Diff: " + str(avgsqdiff)
+        print "N Outliers: " + str(nOutliers)
+        print "Outlier Threshold: " + str(outlierThreshold)
+    return results
