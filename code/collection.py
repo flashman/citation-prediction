@@ -6,6 +6,8 @@
 
 import scipy.sparse as sps
 from itertools import izip
+
+
 class Collection:
     
     def __init__(self,fileLocation=None):
@@ -37,12 +39,10 @@ class Collection:
             line = line.split()
             l = line[0]
             labels.append(l)
-            #nWords = float(sum(int(f.split(':')[1]) for f in line[1:]))
             for feature in line[1:]:
                 kv = feature.split(':')
                 key = int(kv[0])
                 val = int(kv[1])
-             #   if normalize: val = val/nWords 
                 if not count: val = 1
                 row.append(ndocs)
                 col.append(key)
@@ -123,10 +123,22 @@ class Collection:
         '''
         Remove words that appear in less than threshold (% or int) of documents.
         Defaults to 2 documents.
-        '''        
-#        keepCols = [i for i,v in enumerate(self.M.sum(0).A1) if v>=threshold ] 
-#        self.nVocab = len(keepCols)
-#        self.M = self.M[:,keepCols]
+        '''
+
+    def normalize(self):
+        '''normalize feature vectors'''
+        factor = self.M.sum(axis=1)
+        factor = [1.0/f if f!=0 else 0 for f in factor.A1]
+        self.MM=sps.spdiags(factor, 0, len(factor), len(factor)) * self.M
+        self.M.sort_indices()
+
+    def majorityLabel(self):
+        np = sum(1 for l in self.labels if l>0)
+        nn = sum(1 for l in self.labels if l<0)
+        return ( 1 if np>nn else -1)
+
+    def averageLabel(self):
+        return sum(self.labels)/self.nDocs
 
 def join(collectionList):
     '''

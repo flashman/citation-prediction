@@ -71,9 +71,10 @@ def current_micro_time():
     return int(round(time.time() * 1000000))
 
 #REPORTING
-def report(labels,predictions,verbose=True):
+def report(labels,predictions,verbose=True,majorityLabel=None):
     '''
     Report prediction success for binary learning task. Return error rate, precision, recall and naive error rate as a dict.  Also return a boolean vector indicating which predictions were correct.
+    Baseline stores the the mojority rule lable (the majority label of the training data).
     '''
     total = 1.0*len(labels)
     falsePos=0 
@@ -101,9 +102,12 @@ def report(labels,predictions,verbose=True):
     results['errors'] = falsePos+falseNeg
     results['errorRate'] = 1.0*(falsePos+falseNeg)/total
     results['accuracy'] = 1.0*(truePos+trueNeg)/total
-    results['precision'] = 1.0*truePos/(truePos+falsePos)
-    results['recall'] = 1.0*truePos/(truePos+falseNeg)
-    results['naive'] = 1.0*min(truePos+falseNeg,trueNeg + falsePos)/total
+    results['precision'] = 1.0*truePos/max(truePos+falsePos,1.0)
+    results['recall'] = 1.0*truePos/max(truePos+falseNeg,1.0)
+    if majorityLabel:
+        results['baseline'] = 1.0*sum(1 for p in predictions if  p != majorityLabel)/total
+    else:
+        results['baseline'] = 1.0*min(truePos+falseNeg,trueNeg + falsePos)/total
     results['tf']=tf
     results['labels']=labels
     results['predictions']=predictions
@@ -115,7 +119,7 @@ def report(labels,predictions,verbose=True):
         print "Accuracy: " + str(results['accuracy'])
         print "Precision: " + str(results['precision'])
         print "Recall: " + str(results['recall'])
-        print "Niave error rate: " + str(results['naive'])
+        print "Baseline error rate: " + str(results['baseline'])
     return results
 
 def report_regression(labels,predictions,verbose=True,epsilon=1):
@@ -134,7 +138,16 @@ def report_regression(labels,predictions,verbose=True,epsilon=1):
     nOutliers = sum(1 for l in labels if l>=outlierThreshold)
     errors = sum( 1.0 for e in sqdiff if e>0)
     errorRate = errors/total
-    results = {'avgSqDiff': avgsqdiff, 'sqDiff': sqdiff, 'errors': errors, 'errorRate':errorRate, 'nOutliers':nOutliers, 'outlierThreshold': outlierThreshold, 'predictions':predictions, 'labels': labels}
+
+    results=dict()
+    results['avgSqDiff']= avgsqdiff
+    results['sqDiff']= sqdiff
+    results['errors']=errors
+    results['errorRate']=errorRate
+    results['nOutliers']=nOutliers
+    results['outlierThreshold']= outlierThreshold
+    results['predictions']=predictions
+    results['labels']= labels
 
     if verbose:
         print "Documents classified: " + str(total)

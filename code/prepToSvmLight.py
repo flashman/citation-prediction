@@ -6,7 +6,7 @@
 
 import os
 import gzip
-from utils import *
+import utils
 
 DATADIR = '../data/hep-th/'
 RESULTSDIR = '../data/hep-th-svm-cleaned-2/'
@@ -21,16 +21,16 @@ vocabularySet = set()
 fns=[]
 for dirname, dirnames, filenames in os.walk(DATADIR):
     for filename in filenames:
-        if ARXIVFN.match(filename):
+        if utils.ARXIVFN.match(filename):
             fns.append((dirname,filename))
 
 #sort files in ascending order
-filenames = sorted(fns,key=lambda(d,f):datehelper(f))
+filenames = sorted(fns,key=lambda(d,f): utils.datehelper(f))
 
 #build svmlight formated data 
 for filename in filenames:
 
-    if GZ.match(filename[1]):
+    if utils.GZ.match(filename[1]):
         fopen = gzip.open
     else:
         fopen = open

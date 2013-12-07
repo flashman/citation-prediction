@@ -88,8 +88,8 @@ def classify(testData,model,options=None):
     f.close()
 
     #clean up temp files
-    os.remove(testFile)
     os.remove(classificationFile)
+    os.remove(testFile)
 
     return classifications
 
