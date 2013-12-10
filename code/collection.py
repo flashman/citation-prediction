@@ -20,7 +20,7 @@ class Collection:
         if self.fileLocation!=None:
             self.load(self.fileLocation)
 
-    def load(self,fileLocation,count=True,normalize=True):
+    def load(self,fileLocation,normalize=True):
         '''Load svmlight formatted data in label array and csr sparse matrix (row=doc_id, col=word_id)'''
 
         self.fileLocation = fileLocation
@@ -39,11 +39,14 @@ class Collection:
             line = line.split()
             l = line[0]
             labels.append(l)
+            if normalize:
+                tot = 1.0*sum(int(f.split(':')[1]) for f in line[1:])
             for feature in line[1:]:
                 kv = feature.split(':')
                 key = int(kv[0])
                 val = int(kv[1])
-                if not count: val = 1
+                if normalize:
+                    val/=tot
                 row.append(ndocs)
                 col.append(key)
                 count.append(val)

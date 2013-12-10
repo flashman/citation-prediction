@@ -47,7 +47,7 @@ class Network:
         maxDeg = max(deg)
         dd = (maxDeg+1)*[0]
         for d in deg:
-            dd[d]+=1
+            dd[int(d)]+=1
         return dd
 
     def reset(self):

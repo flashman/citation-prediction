@@ -33,7 +33,6 @@ for i,k in enumerate(keys):
     plt.plot(B,avgErr, 'b', label='Naive Bayes')
     plt.plot(B,avgBas, 'g', label='Majority')
     plt.tight_layout()
-#    plt.plot(B,avgDif, 'red')
     ax.set_title('t={0}, w={1}'.format(*k))
     ax.set_ylim([0.4, 1])
 fig.text(0.01, 0.5, 'Average accuracy', ha='center', va='center', rotation='vertical')

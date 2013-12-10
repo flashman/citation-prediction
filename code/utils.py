@@ -105,9 +105,9 @@ def report(labels,predictions,verbose=True,majorityLabel=None):
     results['precision'] = 1.0*truePos/max(truePos+falsePos,1.0)
     results['recall'] = 1.0*truePos/max(truePos+falseNeg,1.0)
     if majorityLabel:
-        results['baseline'] = 1.0*sum(1 for p in predictions if  p != majorityLabel)/total
+        results['naive'] = 1.0*sum(1 for p in predictions if  p != majorityLabel)/total
     else:
-        results['baseline'] = 1.0*min(truePos+falseNeg,trueNeg + falsePos)/total
+        results['naive'] = 1.0*min(truePos+falseNeg,trueNeg + falsePos)/total
     results['tf']=tf
     results['labels']=labels
     results['predictions']=predictions
@@ -119,7 +119,7 @@ def report(labels,predictions,verbose=True,majorityLabel=None):
         print "Accuracy: " + str(results['accuracy'])
         print "Precision: " + str(results['precision'])
         print "Recall: " + str(results['recall'])
-        print "Baseline error rate: " + str(results['baseline'])
+        print "Baseline error rate: " + str(results['naive'])
     return results
 
 def report_regression(labels,predictions,verbose=True,epsilon=1):

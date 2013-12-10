@@ -1,0 +1,90 @@
+\documentclass[letterpaper]{article}
+\pagestyle{empty}
+
+\input{/Users/homoflashmanicus/Documents/LaTex/macros.tex}  % Include macros (for fast typing)
+
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+ \begin{document}
+
+\section{Citation Prediction}
+%MAYBE TOSS THIS PARAGRAPH
+Citation prediction remains a difficult task.  This difficulty is due in part to the inherent nonlinearity of scientific progress, and in part to the social process of validating results.  One of our basic concerns as we address this problem is whether scientific articles exhibit enough  statistical regularity to perform any prediction at all.  In our first pass through the problem, we find that it is possible to perform citation prediction on the collection, but with limited success. 
+
+As our first step, we consider the particular problem of binary classification.  That is,  for a given document, we attempt to predict whether or not it receives at least $\theta$ citations in the first $n$ months after its submission to the arXiv.    We use the standard Support Vector Machines and Naive Bayes Classifier to carry out this task.  Both appear to yield comparable results for the simple problem, though Naive Bayes has notable performance advantages.  As we move forward, we will explore nonlinear kernels  and/or regression analysis with Support Vector Machines. 
+
+Unlike the text classification problems that we  performed in class,  the citation prediction problem has strong temporal dependencies.  These dependencies appear in  the distribution of articles over instance space; scientific work targets unexplored regions of instance space by design, and is sometimes subject to fads and worng turns.  Dependencies also  appear through citation counts. Citation counts follow a power law distribution, which can in part be explained by the phenomenon of preferential attachment...The number of citations that an article receives  in a given period of time is not fundamentally a property of the article, but if how it  fits into the larger scientific narrative. 
+
+This temporal dependence suggests that the documents should not be treated as a single \textit{independently and identically distributed} ($i.i.d.$) collection of documents.  Preliminary analysis supports this general claim; the further the training data lies from the test data, the worse the prediction accuracy becomes. Further investigation of this point will be necessary.  
+
+Instead we assume that data is locally $i.i.d.$ over some $m$-month window, and train a classifier independently over each  such window.  Precisely, we train on articles from the first $m-1$ months of data and validate on the remaining month's worth of data. This temporal partitioning of test and training data is motivated by the fact that in the real world citation prediction problem, we will always be predicting citation count of a new article based on citation counts of previous articles.   It's worth noting that in the real world problem, training data can only be labeled $n$ months after submission.   So there is actually an inherent time lag between test and training data.  It might be interesting to consider this variant in future work.
+
+We performed this learning task for various parameters of $\theta$, $m$, and $n$.  Some preliminary results using the Naive Bayes classifier are provided below: 
+\begin{center}
+\begin{tabular}{c c c | c  | c |  l}
+$\theta$ & $n$ & $m$ &$ \avg{Err_P}$ &$ \avg{Err_{maj} -Err_P} $& doc type \\
+\hline
+5 & 24 & 25 & 0.26 & 0.15 & title and abstract \\
+3 & 12 & 37 & 0.27 & 0.15 & title and abstract \\
+5 & 24 & 25 & 0.25 & 0.17 & full text \\
+3 & 12 & 13 & 0.24 & 0.16 &  full text \\
+
+\end{tabular}
+\end{center}
+Here, $\theta$ and $n$ are chosen so that the number of positive and negative labels are roughly equal.  $\avg{Err_P}$ is the average prediction error over $m$-month windows.   $ \avg{Err_{maj} -Err_P} $ is the average difference in error rate between the classifier and a simple majority rule classification.
+\end{document}
+
+
+%precedes along a series of accidents and unexpected moments of insights (and maybe some hard work).  The problem is further confounded by longterm variation of academic interest across different topic.  More precisely, we do not assume that articles are drawn from the instance space iid.
+
+  strong indications that the method has some predictive power. 
+
+
+Since our data is initially arranged by month, we take as our training data all articles    
+
+
+  But if we don't think the iid assumption holds...then what?  In light of the comments made in the beginning of the section, we will proceed along the latter line of thinking.  
+ 
+
+
+
+Before we carry out this procedure, we must address the import question of the $iid$ assumption: are documents distributed through time according to this assumption?      
+
+
+One important detail that arises up in this classification problem, is the assumption that articles should by identically and independent ally distributed
+     
+
+In many ways, this binary classification problem is standard fair for the course, and we can just use SVMLight or Niave Bayes once  
+
+And the learning problem is easily handled by the computation machinery developed through the course (support vector machines, naive bayes, etc).       
+
+
+In addition we will require that all training data used to construct our classifier precedes
+  
+
+
+ In many ways, this binary classification problem is standard fair for the course.  That is, if we imagine that all articles 
+ 
+ , and is easily handled by the computational machinery developed through the course (support vector machines, naive bayes, etc).   That said, we impose a temporal constant      
+   
+
+Additionally we insist that all training data (articles and citation counts) used to train our classifier must come from 
+
+ this problem would look like in real life, we   
+
+
+Unlike other binary classification problems that we have seen in class,    
+
+
+In many ways, this binary classification problem is standard fair for the course. And the learning problem is easily handled by the computation machinery developed through the course (support vector machines, naive bayes, etc).       
+  
+ For each document published during a particular   
+
+
+
+
+

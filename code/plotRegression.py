@@ -1,7 +1,6 @@
 import pickle
 import matplotlib.pyplot as plt
 
-
 def rSquared(labels,predictions):
     '''Compte r^2 value for predictions given labels'''
     avg = 1.0*sum(labels)/len(labels)
@@ -10,9 +9,9 @@ def rSquared(labels,predictions):
     return num/denom
 
 
-
 FN = '../results/regression.full.e1.9901-0101.2013-12-05.523862.pickle'
 FN = '../results/regression.ta.e1.9901-0101.2013-12-04.223271.pickle'
+FN = '../results/regression.svm.full.9901-9903.2013-12-08_23-43-25.981831.pickle'
 
 SFN = FN.replace('.pickle','.eps')
 SFN2 = FN.replace('.pickle','.scatter.eps')
