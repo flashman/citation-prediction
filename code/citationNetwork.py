@@ -1,7 +1,7 @@
 '''
 @created: Nov 4, 2013
 @author: homoflashmanicus
-@description: Manage arxiv citation network as sparse matrix
+@description: Manage citation network as sparse matrix
 '''
 
 import scipy.sparse as sps

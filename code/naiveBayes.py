@@ -62,3 +62,7 @@ class NaiveBayes:
             else:
                 predictions.append(self.lMajority)
         return predictions
+
+    def getMostImportantTerms(limit=100):
+        '''Get index of  most informative features based on information gain.  Return first <limit> of them.'''
+        pass

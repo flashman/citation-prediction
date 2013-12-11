@@ -149,10 +149,10 @@ def join(collectionList):
     '''
     
     #Find collection collection with largest vocabulary
-    nVocab = max( arts.nVocab for arts in collectionList )
+    nVocab = max( arts.nVocab for arts in collectionList if arts.nVocab)
 
     #standerdize dimensions and stack matrices
-    MS = [arts.M for arts in collectionList]
+    MS = [arts.M for arts in collectionList if arts.M != None]
     for M in MS:
         M._shape = (M.shape[0], nVocab)
     M = sps.vstack(MS, format='csr')
@@ -160,7 +160,7 @@ def join(collectionList):
     #concatenate label lists
     labels = []
     for arts in collectionList:
-        labels.extend(arts.labels)
+        if len(arts.labels)>0: labels.extend(arts.labels)
 
     #build new collection object
     collection = Collection()

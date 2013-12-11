@@ -94,7 +94,7 @@ def classify(testData,model,options=None):
     return classifications
 
 def multiclassLearn(trainingData,classLabels,options=None):
-    #train svm model on each class label
+    '''train svm model on each class label'''
     models = []
     for l in classLabels:
         trainingData.labelForSVM(l)
@@ -103,7 +103,7 @@ def multiclassLearn(trainingData,classLabels,options=None):
     return models
 
 def multiclassClassify(testData,models,options=None):
-    #classify 
+    '''classify on multiclass models'''
     margin = [-10000.0]*len(testData)
     label = [0]*len(testData)
     for l,m in enumerate(models):

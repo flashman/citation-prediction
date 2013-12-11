@@ -1,7 +1,7 @@
 '''
 @created: Nov 6, 2013
 @author: homoflashmanicus
-@description: Predict citation counts of articles.
+@description: Command line tool for predicting citation counts of articles.  Perform various experiments. See below.
 '''
 
 import sys
@@ -184,6 +184,7 @@ def experiment3(args, N):
         trainstart = yymm
         trainend = utils.addMonths(yymm,args.trainwindow)
         print '\nTRAINING RANGE: {0} -> {1}'.format(trainstart, trainend)
+        args.citationThreshold = None
         TRAIN, citationThreshold = loadAndLabel(N, args.root, trainstart,trainend,args.citationMonths,args.citationThreshold, args)
 
         for b in bvals:
@@ -204,12 +205,13 @@ def experiment3(args, N):
     return results
 
 def experiment4(args, N):
-    '''Very c in svm'''
+    '''Very c value for svm classifier.'''
     args.svm=True
     results = dict()
 
-    #for c in [10,15,19,20,22,24,26,30,35,45,60]:
-    for c in [500, 550,600,650,660,675,680,690,700]:
+    #for c in [10,15,19,20,22,24,26,30,35,45,60]: # c-values for title/abstract data set 
+    for c in [500, 550,600,650,660,675,680,690,700]: # c-values for full text data set
+
         print '\n*********************'
         print 'SVM with C = ' + str(c)
         print '*********************\n'
@@ -237,6 +239,7 @@ def experiment4(args, N):
     return results
 
 def experiment5(args,N):
+    ''''sample classifier over one month test sets from args.predictstart to args.predictend.  training window is determined by other args.'''
 
     results = []
 
@@ -257,6 +260,52 @@ def experiment5(args,N):
         results.append( r )
 
     return results
+
+def experiment6(args,N):
+    '''Leave one month out classifier test.'''
+
+    results = []
+
+    for yymm in utils.dateRange(args.trainstart,args.trainend):
+
+        trainrangeL = utils.dateRange(args.trainstart,yymm)
+        trainrangeR = utils.dateRange(utils.addMonths(yymm,1), args.trainend)
+
+        TRAINL = collection.Collection()
+        TRAINR = collection.Collection()
+        
+        citationThreshold = args.citationThreshold
+        if len(trainrangeL)>0: 
+            trainstartL = trainrangeL[0]
+            trainendL = yymm
+            print 'TRAIN RANGE LEFT: {0} -> {1}'.format(trainstartL, trainendL)
+            TRAINL, citationThreshold = loadAndLabel(N, args.root, trainstartL,trainendL,args.citationMonths,citationThreshold,args)
+
+        if len(trainrangeR)>0: 
+            trainstartR = utils.addMonths(yymm,1)
+            trainendR = args.trainend
+            print 'TRAIN RANGE RIGHT: {0} -> {1}'.format(trainstartR, trainendR)
+            TRAINR, citationThreshold = loadAndLabel(N, args.root, trainstartR,trainendR,args.citationMonths,citationThreshold,args)
+        
+        TRAIN = collection.join([TRAINL,TRAINR])
+
+        trainstart = args.trainstart
+        trainend = args.trainend
+        predictstart = yymm
+        predictend = utils.addMonths(yymm,1) 
+
+        print 'PREDICTION RANGE: {0} -> {1}'.format(predictstart, predictend)
+
+        r = trainAndTest(N,trainstart, trainend, predictstart, predictend, args.citationMonths ,citationThreshold,args,TRAIN=TRAIN)
+        r['trainstart']= trainstart
+        r['trainend']=trainend
+        r['predictstart']=predictstart
+        r['predictend']=predictend
+        results.append( r )
+
+    return results
+
+
 
 if __name__ == '__main__':
     '''
@@ -296,6 +345,9 @@ if __name__ == '__main__':
     parser.add_argument("-3","--e3",help="Run experiment with loop over seperation distance between training and test data, for fixed training set", action="store_true")
     parser.add_argument("-4","--e4",help="Run experiment with loop over c value for svm", action="store_true")
     parser.add_argument("-5","--e5",help="Run experument with loop over single months between predict start and predict end ", action="store_true")
+    parser.add_argument("-6","--e6",help="Run experument with leave one month out error", action="store_true")
+    
+    #save
     parser.add_argument("-s","--save",help="Save results to file (as pickled dict)", action="store_true")
 
     args = parser.parse_args(sys.argv)
@@ -328,6 +380,9 @@ if __name__ == '__main__':
     elif args.e5:
         ex = 5
         results = experiment5(args, N)
+    elif args.e6:
+        ex = 6
+        results = experiment6(args, N)
 
 
 
