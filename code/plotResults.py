@@ -64,7 +64,6 @@ def plotTrainTestSep(results,title,saveas):
     plt.ylabel('Avg accuracy')
     plt.title(title)
     plt.legend()
-#    plt.ylim([0.4, .9])
 
     if saveas:
         plt.savefig(saveas,bbox_inches='tight',pad_inches=.2)
@@ -76,12 +75,15 @@ def plotTrainTestSepAll(title,saveas):
     f1 = open('../results/binary.nb.full.ex3.pickle','r')
     f2 = open('../results/binary.nb.ta.ex3.pickle','r')
     f3 = open('../results/binary.svm.ta.ex3.pickle','r')
+    f4 = open('../results/binary.svm.full.ex3.pickle','r')
     results1 = pickle.load(f1)['results']
     results2 = pickle.load(f2)['results']
     results3 = pickle.load(f3)['results']
+    results4 = pickle.load(f4)['results']
     f1.close()
     f2.close()
     f3.close()
+    f4.close()
 
     keys = sorted(results1.keys())
     B = [int(k) for k in keys]
@@ -89,33 +91,40 @@ def plotTrainTestSepAll(title,saveas):
     avgErr1 = []
     avgErr2 = []
     avgErr3 = []
+    avgErr4 = []
     avgBas1 = []
     avgBas2 = []
     avgBas3 = []
+    avgBas4 = []
 
     for j in keys:
         errors1 = [v['errorRate'] for v in results1[j]]
         errors2 = [v['errorRate'] for v in results2[j]]
         errors3 = [v['errorRate'] for v in results3[j]]
+        errors4 = [v['errorRate'] for v in results4[j]]
         baseline1 = [v['naive'] for v in results1[j]]
         baseline2 = [v['naive'] for v in results2[j]]
         baseline3 = [v['naive'] for v in results3[j]]
+        baseline4 = [v['naive'] for v in results4[j]]
         avgErr1.append( 1.0- sum(errors1)/len(errors1) )
         avgErr2.append( 1.0- sum(errors2)/len(errors2) )
         avgErr3.append( 1.0- sum(errors3)/len(errors3) )
+        avgErr4.append( 1.0- sum(errors4)/len(errors4) )
         avgBas1.append(1.0 -sum(baseline1)/len(errors1) )
         avgBas2.append(1.0 -sum(baseline2)/len(errors2) )
         avgBas3.append(1.0 -sum(baseline3)/len(errors3) )
+        avgBas4.append(1.0 -sum(baseline4)/len(errors4) )
     plt.plot(B,avgErr1, 'm',  label="NB (Full Text)")
     plt.plot(B,avgErr2, 'g', label="NB (Title/Abstract)")
     plt.plot(B,avgErr3, 'b', label="SVM (Title/Abstract)")    
+    plt.plot(B,avgErr4, 'r', label="SVM (Full Text)")    
     plt.plot(B,avgBas1, '--', color='grey', label="Baseline")
-    #plt.plot(B,avgBas2, 'g--', label="NB baseline (TA)")
-    #plt.plot(B,avgBas3, 'b--', label="SVM baseline (TA)")
+
     print B
     print avgErr1
     print avgErr2
     print avgErr3
+    print avgErr4
     print avgBas1
     plt.xlabel('Training  and test data seperation (months)') 
     plt.ylabel('Average accuracy')
@@ -128,7 +137,6 @@ def plotTrainTestSepAll(title,saveas):
     else:
         plt.show()
 
-
 def plotRegression(results,title,saveas):
     fig = plt.figure()
     fig.set_size_inches(8,4)
@@ -139,11 +147,6 @@ def plotRegression(results,title,saveas):
         allPredictions.extend( v['predictions'] )
     rsq = rSquared(allLabels,allPredictions)
     plt.scatter(allLabels,allPredictions, color='k', marker='.')
-    print 'R^2={0:.8f}'.format(rsq)
-    print 'labels_ta = '
-    print allLabels
-    print 'predictions_ta = '
-    print allPredictions
     plt.plot([x for x in range(100)], [y for y in range(100)], 'k--')
     plt.ylim([0,25])
     plt.xlim([0,150])
@@ -163,16 +166,11 @@ def plotExperiment4(results,title,saveas):
     #compute average error rates  for difference c values 
     keys = sorted(results.keys())
     avgErr = []
-    #avgBas = []
     for j in keys:
         errors = [ v['errorRate'] for v in results[j] ]
-        #baseline = [ v['naive'] for v in results[j] ] #title abstract
         avgErr.append( 1.0- sum(errors)/len(errors) )
-        #avgBas.append(1.0 -sum(baseline)/len(errors) ) 
     plt.figure()
     plt.plot(keys,avgErr, 'k' , label='SVM with C-value')
-    print 'SVM with C-Values'
-    #plt.plot(keys,avgBas, '--', color='grey',  label='Baseline')
     #plt.plot(23.846254166666668, 0.7111975028322917, 'ro', label = 'SVM with default C-value' )  #title abstract
     plt.plot(664.3, .7644, 'ro', label = 'SVM with default C-value' )  #full text
 
@@ -195,11 +193,11 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument("main")
     parser.add_argument("filename",help="location of data to be plotted")
-    parser.add_argument("-t", "--type", help="Index of plotting type",type=int)
+    parser.add_argument("-t", "--type", help="Specify plotting mode. Corresponds to operating modes in citationPredicition.py, more or less.",type=int)
     parser.add_argument("-s","--save", help="save results to file",action="store_true",default=False)
-    parser.add_argument("-i","--inspect", help="inspect file header", action="store_true")
-    parser.add_argument("--title", help="Add a title",type=str, default='')
-    parser.add_argument("--saveas", help="Save figure as ...", type=str, default=None)
+    parser.add_argument("-i","--inspect", help="Inspect metadata", action="store_true")
+    parser.add_argument("--title", help="Add a specific title to the figure",type=str, default='')
+    parser.add_argument("--saveas", help="Save figure as...", type=str, default=None)
 
 
     args = parser.parse_args(sys.argv)
