@@ -2,12 +2,12 @@ CS4780
 Final Project
 Submitted on Dec 11, 2013
 @authors: Michael Flashman, Hyung Joo Parg, Andrey Gushchin
-@netid: mtf53, hp255, avg36
+@netids: mtf53, hp255, avg36
 
 *********************
 Description
 *********************
-Command-line tools, classes, and functions for predicting citation counts on arxiv pre-prints
+Command-line tools, classes, and functions for predicting citation counts on arxiv pre-prints from jan 1993 to april 2003
 See details below.
 
 *********************
@@ -211,6 +211,7 @@ A general description of the various pieces, in order of importance.
     Description: 
     Various utility functions.
     Includes functions for handling arxiv ids eg '9902001' and arxiv date string eg '9902'.
+    Also includes functions for assessing classifier prediction results. 
 
     ---------------------
     prepToSvmLight.py
